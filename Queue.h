@@ -128,23 +128,29 @@ class Queue {
 
 };
 
-
+//TODO do we need to keep an old copy? they didnt specify + take into account having the iteration on an empty queue
+//TODO consult if to allocate a new queue or edit the one and how
 template <typename T>
 Queue<T> Filter (Queue<T> CurrentQueue , bool(&conditionFunction)(T)) {
 
 
-    //TODO not sure if i need const or not.
+
+    //TODO not sure if i need const &T or not.
     for( T& element : CurrentQueue){
-        if{
-
+        if(conditionFunction(CurrentQueue.m_value)==false){
+            CurrentQueue.pushBack(element);
         }
-
-
     }
+    return CurrentQueue;
 };
 
 template <typename T>
-Queue<T> transform (Queue<T> queue1 , bool(&conditionFunction)(T)) {};
+Queue<T> transform (Queue<T> CurrentQueue , void(&TransformFunction)(T)) {
+    for( T& element : CurrentQueue){
+        TransformFunction(element->m_value);
+        }
+    return CurrentQueue;
+};
 
 
 
