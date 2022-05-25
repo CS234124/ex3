@@ -3,4 +3,5 @@ project(mtm_ex3)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(mtm_ex3 main.cpp HealthPointsExampleTest.cpp TestMain.cpp QueueExampleTests.cpp TestUtils.h)
+add_executable(mtm_ex3  HealthPoints.h TestUtils.h HealthPoints.cpp HealthPointsExampleTest.cpp TestMain.cpp)
+#        main.cpp  QueueExampleTests.cpp )
