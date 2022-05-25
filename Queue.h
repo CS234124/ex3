@@ -25,51 +25,64 @@ public:
         m_size=0;
             }
 
+            //TODO calling a function that has a return value. is there a better way to deconstruct it?
+    ~Queue(){
+       while (isEmpty()==false)
+       {
+           PopFront();
+       }
+    }
+
     //declaring and writing the functions
     bool isEmpty() {
         return (m_front==NULL) && (m_rear==NULL);
     }
 
-    void Pushback(Node<T>* n){
+    void Pushback(T* n){
+
+        Node<T>* temp=new Node<T>*(n);
             if(isEmpty()){
-                m_front = n;
-                m_rear = n;
+                m_front = temp;
+                m_rear = temp;
             }
             else{
-                m_rear->m_next=n;
-                m_rear=n;
+                m_rear->m_next=temp;
+                m_rear=temp;
             }
             m_size++;
-
     }
-    Node<T>* Front() {
-            if (isEmpty()){
-                throw EmptyQueue();
-            }
-            return m_front;
 
-    }
-    Node<T>* PopFront() {
-            Node<T>* temp=NULL;
+    T* PopFront() {
+
             if(isEmpty()){
                 throw EmptyQueue();
             }
 
+
             else{
+                T* value=*this->m_front.m_value;
                 m_size--;
                 if(m_front==m_rear){
-                    temp=m_front;
-                    m_front=NULL;
-                    m_rear=NULL;
-                    return temp;
+                    delete (*this->m_front);
+                    //will also delete m_rear as they point to the same space
+                    return value;
                 }
                 else{
+                    Node<T>* temp=NULL;
                     temp=m_front;
                     m_front=m_front->next;
-                    return temp;
+                    delete (temp);
+                    return value;
                 }
-
             }
+    }
+
+    Node<T>* Front() {
+        if (isEmpty()){
+            throw EmptyQueue();
+        }
+        return m_front;
+
     }
 
     int Size() {
