@@ -25,9 +25,8 @@ public:
         m_size=0;
             }
 
-            //TODO calling a function that has a return value. is there a better way to deconstruct it?
     ~Queue(){
-       while (isEmpty()==false)
+       while (!isEmpty())
        {
            PopFront();
        }
@@ -41,6 +40,7 @@ public:
     void Pushback(T* n){
 
         Node<T>* temp=new Node<T>*(n);
+        //TODO ADD EXCEPTION
             if(isEmpty()){
                 m_front = temp;
                 m_rear = temp;
@@ -52,27 +52,21 @@ public:
             m_size++;
     }
 
-    T* PopFront() {
-
+    void PopFront() {
             if(isEmpty()){
                 throw EmptyQueue();
             }
 
-
             else{
-                T* value=*this->m_front.m_value;
                 m_size--;
                 if(m_front==m_rear){
                     delete (*this->m_front);
                     //will also delete m_rear as they point to the same space
-                    return value;
                 }
                 else{
-                    Node<T>* temp=NULL;
-                    temp=m_front;
+                    Node<T>* temp=m_front;
                     m_front=m_front->next;
                     delete (temp);
-                    return value;
                 }
             }
     }
@@ -82,7 +76,6 @@ public:
             throw EmptyQueue();
         }
         return m_front;
-
     }
 
     int Size() {
@@ -105,7 +98,6 @@ public:
             if(*this==NULL){
                 throw InvalidOperation{};
             }
-
             return m_current->m_value;
         }
 
@@ -141,6 +133,7 @@ public:
             this->queue = queue;
             this->m_current = m_current;
         }
+
         friend class Queue<T>;
 
     };
@@ -152,6 +145,7 @@ public:
         return Iterator(this, m_rear);
     }
 
+    //TODO add the const_iterator to the class
 
 private:
 
@@ -173,13 +167,12 @@ Queue<T> Filter (Queue<T> CurrentQueue , bool(&conditionFunction)(T)) {
 };
 
 template <typename T, typename U>
-Queue<T> transform (Queue<T> CurrentQueue , U (&TransformFunction)(T)) {
+void transform (Queue<T> CurrentQueue , U (&TransformFunction)(T)) {
 
-    Queue<T> queue;
     for( const T& element : CurrentQueue){
-        queue.pushBack(TransformFunction(&element->m_value));
+        TransformFunction(&element->m_value);
         }
-    return queue;
+
 };
 
 
