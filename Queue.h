@@ -3,19 +3,28 @@
 //setting up the node class
 template <typename T> class Node
 {
-    public:
+private:
+    T m_value;
+    Node<T>* m_next;
+
+public:
     Node( T member) {
-        this->m_value = member;
-        this->m_next = NULL;
+        m_value = member;
+        m_next = NULL;
     }
 
-    private:
-    T m_value;
-    T* m_next;
+    Node<T>* getNext(){
+        return m_next;
+    }
 };
 
 template <typename T>
 class Queue {
+
+private:
+    Node<T>* m_rear, *m_front;
+    int m_size;
+
 
 public:
 
@@ -23,13 +32,13 @@ public:
         m_front=NULL;
         m_rear=NULL;
         m_size=0;
-            }
+    }
 
     ~Queue(){
-       while (!isEmpty())
-       {
-           PopFront();
-       }
+        while (!isEmpty())
+        {
+            PopFront();
+        }
     }
 
     //declaring and writing the functions
@@ -40,36 +49,34 @@ public:
     void Pushback(T* n){
 
         Node<T>* temp=new Node<T>*(n);
-        //TODO ADD EXCEPTION
-            if(isEmpty()){
-                m_front = temp;
-                m_rear = temp;
-            }
-            else{
-                m_rear->m_next=temp;
-                m_rear=temp;
-            }
-            m_size++;
+//TODO how to assign the exception of bad_alloc
+
+        if(isEmpty()){
+            m_front = temp;
+            m_rear = temp;
+        }
+        else{
+            m_rear->getNext()=temp;
+            m_rear=temp;
+        }
+        m_size++;
     }
 
     void PopFront() {
-            if(isEmpty()){
-                throw EmptyQueue();
-            }
-
-            else{
-                m_size--;
-                if(m_front==m_rear){
-                    delete (*this->m_front);
-                    //will also delete m_rear as they point to the same space
-                }
-                else{
-                    Node<T>* temp=m_front;
-                    m_front=m_front->next;
-                    delete (temp);
-                }
-            }
+        if(isEmpty()){
+            throw EmptyQueue();
+        }
+        m_size--;
+        if(m_front==m_rear){
+            delete (m_front);
+        }
+        else{
+            Node<T>* temp=m_front;
+            m_front= m_front->getNext();
+            delete (temp);
+        }
     }
+
 
     Node<T>* Front() {
         if (isEmpty()){
@@ -79,12 +86,11 @@ public:
     }
 
     int Size() {
-            return m_size;
+        return m_size;
     }
 
     //exception
     class EmptyQueue{};
-
 
     //iterator definition
     class Iterator{
@@ -114,7 +120,7 @@ public:
             return ++*this;
         }
 
-        //TODO need a checkup
+        //TODO need a checkup - in the end
         bool operator!=(const Iterator& it) const{
             if(queue==it.queue){
                 return m_current == it.m_current;
@@ -145,12 +151,8 @@ public:
         return Iterator(this, m_rear);
     }
 
+
     //TODO add the const_iterator to the class
-
-private:
-
-    Node<T>* m_rear, m_front;
-    int m_size;
 
 };
 
@@ -166,12 +168,13 @@ Queue<T> Filter (Queue<T> CurrentQueue , bool(&conditionFunction)(T)) {
     return queue;
 };
 
+//TODO make sure its the same tyoe and shit
 template <typename T, typename U>
 void transform (Queue<T> CurrentQueue , U (&TransformFunction)(T)) {
 
     for( const T& element : CurrentQueue){
         TransformFunction(&element->m_value);
-        }
+    }
 
 };
 
