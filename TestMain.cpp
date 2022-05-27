@@ -31,7 +31,7 @@ std::function<bool()> testsList[] = {
 
 const int NUMBER_OF_TESTS = sizeof(testsList)/sizeof(std::function<bool()>);
 
-int main(int argc, char *argv[])
+int main2(int argc, char *argv[])
 {
 	if (argc < 2) {
 		for (int i = 0; i < NUMBER_OF_TESTS; ++i) {

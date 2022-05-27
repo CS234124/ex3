@@ -1,181 +1,239 @@
 #include <iostream>
 
 //setting up the node class
-template <typename T> class Node
-{
+template<typename T>
+class Node {
 private:
     T m_value;
-    Node<T>* m_next;
+    Node<T> *m_next;
 
 public:
-    Node( T member) {
-        m_value = member;
+    Node(T value) {
+        m_value = value;
         m_next = NULL;
     }
 
-    Node<T>* getNext(){
+    Node(const Node<T> &other) : m_value(other.m_value), m_next(other.m_next) {}
+
+    Node &operator=(const Node<T> &other) = default;
+
+    ~Node() = default;
+
+    Node *getNext() {
         return m_next;
+    }
+
+    void setNext(Node<T> *nextNode) {
+        m_next = nextNode;
+    }
+
+    T &getValue() {
+        return m_value;
     }
 };
 
-template <typename T>
+template<typename T>
 class Queue {
 
 private:
-    Node<T>* m_rear, *m_front;
+    Node<T> *m_rear, *m_front;
     int m_size;
 
 
 public:
 
-    Queue(){
-        m_front=NULL;
-        m_rear=NULL;
-        m_size=0;
+    Queue() {
+        m_front = NULL;
+        m_rear = NULL;
+        m_size = 0;
     }
 
-    ~Queue(){
-        while (!isEmpty())
-        {
-            PopFront();
+    ~Queue() {
+        while (!isEmpty()) {
+            popFront();
         }
     }
 
     //declaring and writing the functions
     bool isEmpty() {
-        return (m_front==NULL) && (m_rear==NULL);
+        return (m_front == NULL) && (m_rear == NULL);
     }
 
-    void Pushback(T* n){
-
-        Node<T>* temp=new Node<T>*(n);
+    void pushBack(T value) {
+        Node<T> *temp = new Node<T>(value);
 //TODO how to assign the exception of bad_alloc
 
-        if(isEmpty()){
+        if (isEmpty()) {
             m_front = temp;
             m_rear = temp;
-        }
-        else{
-            m_rear->getNext()=temp;
-            m_rear=temp;
+        } else {
+            m_rear->setNext(temp);
+            m_rear = temp;
         }
         m_size++;
     }
 
-    void PopFront() {
-        if(isEmpty()){
+    void popFront() {
+        if (isEmpty()) {
             throw EmptyQueue();
         }
         m_size--;
-        if(m_front==m_rear){
+        if (m_front == m_rear) {
             delete (m_front);
-        }
-        else{
-            Node<T>* temp=m_front;
-            m_front= m_front->getNext();
+        } else {
+            Node<T> *temp = m_front;
+            m_front = m_front->getNext();
             delete (temp);
         }
     }
 
-
-    Node<T>* Front() {
-        if (isEmpty()){
+    T &front() {
+        if (isEmpty()) {
             throw EmptyQueue();
         }
-        return m_front;
+        return m_front->getValue();
     }
 
-    int Size() {
+    int size() {
         return m_size;
     }
 
     //exception
-    class EmptyQueue{};
+    class EmptyQueue {
+    };
 
-    //iterator definition
-    class Iterator{
-    public:
-        //exception
-        class InvalidOperation{};
+    class Iterator {
+        friend class Queue<T>;
 
-        //constructor and defining
-        const T& operator*() const{
+    private:
+        Queue<T> *m_queue;
+        Node<T> *m_currentNode;
 
-            if(*this==NULL){
-                throw InvalidOperation{};
-            }
-            return m_current->m_value;
+        Iterator(Queue<T> *queue, Node<T> *currentNode) : m_queue(queue), m_currentNode(currentNode) {
         }
 
-        Iterator& operator++(){
+    public:
+        Iterator(const Iterator &other) : m_queue(other.m_queue), m_currentNode(other.m_currentNode) {}
 
-            if(*this==NULL){
+        Iterator &operator=(const Iterator &other) = default;
+
+        ~Iterator() = default;
+
+        //operators
+        T &operator*() const {
+            if (this == NULL) {
                 throw InvalidOperation{};
             }
+            return m_currentNode->getValue();
+        }
 
-            m_current=m_current->m_next;
+        Iterator &operator++() {
+            if (this == NULL) {
+                throw InvalidOperation{};
+            }
+            m_currentNode = m_currentNode->getNext();
             return *this;
         }
-        Iterator& operator++(int){
+
+        Iterator &operator++(int) {
             return ++*this;
         }
 
-        //TODO need a checkup - in the end
-        bool operator!=(const Iterator& it) const{
-            if(queue==it.queue){
-                return m_current == it.m_current;
-            }
-            else{
-                return false;
-            }
+        bool operator!=(const Iterator &it) const {
+            return m_queue != it.m_queue || m_currentNode != it.m_currentNode;
         }
 
-
-
-    private:
-        const Queue<T>* queue;
-        Node<T>* m_current;
-        Iterator(const Queue<T>* queue , Node<T>* m_current){
-            this->queue = queue;
-            this->m_current = m_current;
-        }
-
-        friend class Queue<T>;
-
+        //exception
+        class InvalidOperation {
+        };
     };
 
-    Iterator begin() const{
+    class ConstIterator {
+        friend class Queue<T>;
+
+    private:
+        const Queue<T> *m_queue;
+        const Node<T> *m_currentNode;
+
+        ConstIterator(const Queue<T> *queue, Node<T> *currentNode) : m_queue(queue), m_currentNode(currentNode) {}
+
+    public:
+        ConstIterator(const ConstIterator &other) = default;
+
+        ConstIterator(const Iterator &other) : m_queue(other.m_queue), m_currentNode(other.m_currentNode) {}
+
+        ConstIterator &operator=(const ConstIterator &other) = default;
+
+        ConstIterator &operator=(const Iterator &other) {
+            m_queue = other.m_queue;
+            m_currentNode = other.m_currentNode;
+        }
+
+        ~ConstIterator() = default;
+
+        const T &operator*() const {
+            if (this == NULL) {
+                throw InvalidOperation{};
+            }
+            return m_currentNode->getValue();
+        }
+
+        ConstIterator &operator++() {
+            if (this == NULL) {
+                throw InvalidOperation{};
+            }
+
+            m_currentNode = m_currentNode->getNext();
+            return *this;
+        }
+
+        ConstIterator &operator++(int) {
+            return ++*this;
+        }
+
+        bool operator!=(const ConstIterator &it) const {
+            return m_queue != it.m_queue || m_currentNode != it.m_currentNode;
+        }
+
+        //exception
+        class InvalidOperation {
+        };
+    };
+
+    Iterator begin() {
         return Iterator(this, m_front);
     }
-    Iterator end() const{
-        return Iterator(this, m_rear);
+
+    Iterator end() {
+        return Iterator(this, m_rear->getNext());
+    }
+    ConstIterator begin() const {
+        return ConstIterator(this, m_front);
     }
 
-
-    //TODO add the const_iterator to the class
-
+    ConstIterator end() const {
+        return ConstIterator(this, m_rear->getNext());
+    }
 };
 
-template <typename T>
-Queue<T> Filter (Queue<T> CurrentQueue , bool(&conditionFunction)(T)) {
-
-    Queue<T> queue;
-    for( const T& element : CurrentQueue){
-        if(conditionFunction(element.m_value)){
-            queue.pushBack(element);
+template<typename T>
+Queue<T> filter(Queue<T> currentQueue, bool(&conditionFunction)(T)) {
+    Queue<T> filteredQueue;
+    for (const T &element: currentQueue) {
+        if (conditionFunction(element)) {
+            filteredQueue.pushBack(element);
         }
     }
-    return queue;
+    return filteredQueue;
 };
 
 //TODO make sure its the same tyoe and shit
-template <typename T, typename U>
-void transform (Queue<T> CurrentQueue , U (&TransformFunction)(T)) {
+template<typename T>
+void transform(Queue<T> currentQueue, void (&transformFunction)(T &)) {
 
-    for( const T& element : CurrentQueue){
-        TransformFunction(&element->m_value);
+    for (T element: currentQueue) {
+        transformFunction(element);
     }
-
 };
 
 
