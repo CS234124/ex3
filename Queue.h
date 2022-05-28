@@ -19,7 +19,7 @@ public:
 
     ~Node() = default;
 
-    Node *getNext() {
+    Node *getNext() const {
         return m_next;
     }
 
@@ -28,6 +28,10 @@ public:
     }
 
     T &getValue() {
+        return m_value;
+    }
+
+    const T &getValue() const {
         return m_value;
     }
 };
@@ -152,8 +156,8 @@ public:
         friend class Queue<T>;
 
     private:
-        const Queue<T> *m_queue;
-        const Node<T> *m_currentNode;
+        Queue<T> const *m_queue;
+        Node<T> const *m_currentNode;
 
         ConstIterator(const Queue<T> *queue, Node<T> *currentNode) : m_queue(queue), m_currentNode(currentNode) {}
 
@@ -207,6 +211,7 @@ public:
     Iterator end() {
         return Iterator(this, m_rear->getNext());
     }
+
     ConstIterator begin() const {
         return ConstIterator(this, m_front);
     }
