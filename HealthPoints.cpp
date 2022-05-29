@@ -43,7 +43,7 @@ HealthPoints &HealthPoints::operator+=(const int &addend) {
     return *this;
 }
 
-HealthPoints HealthPoints::operator+(const int &addend) const {
+HealthPoints HealthPoints::operator+(const int addend) const {
     HealthPoints resultHealthPoints = *this;
     resultHealthPoints += addend;
     return resultHealthPoints;
@@ -73,7 +73,36 @@ bool HealthPoints::operator<=(const HealthPoints &other) const {
     return m_healthPoints <= other.m_healthPoints;
 }
 
+HealthPoints operator+(int addend, const HealthPoints &healthPoints) {
+    return healthPoints + addend;
+}
+
+bool operator==(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
+    return comparedHealthPoints == comparedNum;
+}
+
+bool operator!=(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
+    return comparedHealthPoints != comparedNum;
+}
+
+bool operator>(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
+    return comparedHealthPoints < comparedNum;
+}
+
+bool operator>=(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
+    return comparedHealthPoints <= comparedNum;
+}
+
+bool operator<(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
+    return comparedHealthPoints > comparedNum;
+}
+
+bool operator<=(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
+    return comparedHealthPoints >= comparedNum;
+}
+
+
 std::ostream &operator<<(std::ostream &os, const HealthPoints &healthPoints) {
-    os<<healthPoints.m_healthPoints<<"("<<healthPoints.m_maxHealthPoints<<")";
+    os << healthPoints.m_healthPoints << "(" << healthPoints.m_maxHealthPoints << ")";
     return os;
 }

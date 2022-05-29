@@ -28,7 +28,7 @@ public:
 
     HealthPoints &operator+=(const int &addend);
 
-    HealthPoints operator+(const int &addend) const;
+    HealthPoints operator+(int addend) const;
 
     bool operator==(const HealthPoints &other) const;
 
@@ -48,32 +48,18 @@ public:
     };
 };
 
-static HealthPoints operator+(const int &addend, const HealthPoints &healthPoints) {
-    return healthPoints + addend;
-}
+HealthPoints operator+(int addend, const HealthPoints &healthPoints);
 
-static bool operator==(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
-    return comparedHealthPoints == comparedNum;
-}
+bool operator==(const int &comparedNum, const HealthPoints &comparedHealthPoints);
 
-static bool operator!=(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
-    return comparedHealthPoints != comparedNum;
-}
+bool operator!=(const int &comparedNum, const HealthPoints &comparedHealthPoints);
 
-static bool operator>(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
-    return comparedHealthPoints < comparedNum;
-}
+bool operator>(const int &comparedNum, const HealthPoints &comparedHealthPoints);
 
-static bool operator>=(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
-    return comparedHealthPoints <= comparedNum;
-}
+bool operator>=(const int &comparedNum, const HealthPoints &comparedHealthPoints);
 
-static bool operator<(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
-    return comparedHealthPoints > comparedNum;
-}
+bool operator<(const int &comparedNum, const HealthPoints &comparedHealthPoints);
 
-static bool operator<=(const int &comparedNum, const HealthPoints &comparedHealthPoints) {
-    return comparedHealthPoints >= comparedNum;
-}
+bool operator<=(const int &comparedNum, const HealthPoints &comparedHealthPoints);
 
 #endif //MTM_EX3_HEALTHPOINTS_H

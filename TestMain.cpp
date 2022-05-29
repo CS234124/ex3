@@ -18,10 +18,10 @@ namespace QueueTests {
 }
 
 std::function<bool()> testsList[] = {
-//	HealthPointsTests::testInitialization,
-//	HealthPointsTests::testArithmaticOperators,
-//	HealthPointsTests::testComparisonOperators,
-//	HealthPointsTests::testOutputOperator,
+	HealthPointsTests::testInitialization,
+	HealthPointsTests::testArithmaticOperators,
+	HealthPointsTests::testComparisonOperators,
+	HealthPointsTests::testOutputOperator,
 
 	QueueTests::testQueueMethods,
 	QueueTests::testModuleFunctions,

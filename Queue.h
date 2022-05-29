@@ -1,71 +1,93 @@
 #include <iostream>
 
 //setting up the node class
-template<typename T>
-class Node {
-private:
-    T m_value;
-    Node<T> *m_next;
-
-public:
-    Node(T value) {
-        m_value = value;
-        m_next = NULL;
-    }
-
-    Node(const Node<T> &other) : m_value(other.m_value), m_next(other.m_next) {}
-
-    Node &operator=(const Node<T> &other) = default;
-
-    ~Node() = default;
-
-    Node *getNext() const {
-        return m_next;
-    }
-
-    void setNext(Node<T> *nextNode) {
-        m_next = nextNode;
-    }
-
-    T &getValue() {
-        return m_value;
-    }
-
-    const T &getValue() const {
-        return m_value;
-    }
-};
 
 template<typename T>
 class Queue {
+    class Node {
+    private:
+        T m_value;
+        Queue<T>::Node *m_next;
 
+    public:
+        Node(T value) {
+            m_value = value;
+            m_next = nullptr;
+        }
+
+        Node(const Queue<T>::Node &other) : m_value(other.m_value), m_next(other.m_next) {}
+
+        Node &operator=(const Queue<T>::Node &other) = default;
+
+        ~Node() = default;
+
+        bool &operator==(const Queue<T>::Node &other) {
+            return m_value == other.m_value && m_next == other.m_next;
+        }
+
+        Node *getNext() const {
+            return m_next;
+        }
+
+        void setNext(Queue<T>::Node *nextNode) {
+            m_next = nextNode;
+        }
+
+        T &getValue() {
+            return m_value;
+        }
+
+        const T &getValue() const {
+            return m_value;
+        }
+    };
 private:
-    Node<T> *m_rear, *m_front;
+    Queue<T>::Node *m_rear, *m_front;
     int m_size;
 
-
-public:
-
-    Queue() {
-        m_front = NULL;
-        m_rear = NULL;
-        m_size = 0;
-    }
-
-    ~Queue() {
+    void emptyQueue() {
         while (!isEmpty()) {
             popFront();
         }
     }
 
-    //declaring and writing the functions
-    bool isEmpty() {
-        return (m_front == NULL) && (m_rear == NULL);
+    bool isEmpty() const {
+        return (m_front == nullptr) && (m_rear == nullptr);
     }
 
-    void pushBack(T value) {
-        Node<T> *temp = new Node<T>(value);
-//TODO how to assign the exception of bad_alloc
+public:
+
+    Queue() {
+        m_front = nullptr;
+        m_rear = nullptr;
+        m_size = 0;
+    }
+
+    Queue(const Queue<T> &other) {
+        m_front = nullptr;
+        m_rear = nullptr;
+        m_size = 0;
+        for (T element: other) {
+            pushBack(element);
+        }
+    }
+
+    Queue &operator=(const Queue<T> &other) {
+        if (this != &other) {
+            emptyQueue();
+            for (T element: other) {
+                pushBack(element);
+            }
+        }
+        return *this;
+    }
+
+    ~Queue() {
+        emptyQueue();
+    }
+
+    void pushBack(const T value) {
+        Queue<T>::Node *temp = new Queue<T>::Node(value);
 
         if (isEmpty()) {
             m_front = temp;
@@ -81,24 +103,26 @@ public:
         if (isEmpty()) {
             throw EmptyQueue();
         }
-        m_size--;
         if (m_front == m_rear) {
             delete (m_front);
+            m_front = nullptr;
+            m_rear = nullptr;
         } else {
-            Node<T> *temp = m_front;
+            Queue<T>::Node *temp = m_front;
             m_front = m_front->getNext();
             delete (temp);
         }
+        m_size--;
     }
 
-    T &front() {
+    T &front() const {
         if (isEmpty()) {
             throw EmptyQueue();
         }
         return m_front->getValue();
     }
 
-    int size() {
+    int size() const {
         return m_size;
     }
 
@@ -111,9 +135,12 @@ public:
 
     private:
         Queue<T> *m_queue;
-        Node<T> *m_currentNode;
+        Queue<T>::Node *m_currentNode;
 
-        Iterator(Queue<T> *queue, Node<T> *currentNode) : m_queue(queue), m_currentNode(currentNode) {
+        Iterator(Queue<T> *queue, Queue<T>::Node *currentNode) : m_queue(queue), m_currentNode(currentNode) {}
+
+        bool operator==(const Iterator &it) const {
+            return m_queue == it.m_queue && m_currentNode == it.m_currentNode;
         }
 
     public:
@@ -125,14 +152,14 @@ public:
 
         //operators
         T &operator*() const {
-            if (this == NULL) {
+            if (*this == m_queue->end()) {
                 throw InvalidOperation{};
             }
             return m_currentNode->getValue();
         }
 
         Iterator &operator++() {
-            if (this == NULL) {
+            if (*this == m_queue->end()) {
                 throw InvalidOperation{};
             }
             m_currentNode = m_currentNode->getNext();
@@ -157,9 +184,13 @@ public:
 
     private:
         Queue<T> const *m_queue;
-        Node<T> const *m_currentNode;
+        Queue<T>::Node const *m_currentNode;
 
-        ConstIterator(const Queue<T> *queue, Node<T> *currentNode) : m_queue(queue), m_currentNode(currentNode) {}
+        ConstIterator(const Queue<T> *queue, Queue<T>::Node *currentNode) : m_queue(queue), m_currentNode(currentNode) {}
+
+        bool operator==(const ConstIterator &it) const {
+            return m_queue == it.m_queue && m_currentNode == it.m_currentNode;
+        }
 
     public:
         ConstIterator(const ConstIterator &other) = default;
@@ -176,14 +207,14 @@ public:
         ~ConstIterator() = default;
 
         const T &operator*() const {
-            if (this == NULL) {
+            if (*this == m_queue->end()) {
                 throw InvalidOperation{};
             }
             return m_currentNode->getValue();
         }
 
         ConstIterator &operator++() {
-            if (this == NULL) {
+            if (*this == m_queue->end()) {
                 throw InvalidOperation{};
             }
 
@@ -209,6 +240,9 @@ public:
     }
 
     Iterator end() {
+        if (m_rear == nullptr) {
+            return Iterator(this, nullptr);
+        }
         return Iterator(this, m_rear->getNext());
     }
 
@@ -217,29 +251,30 @@ public:
     }
 
     ConstIterator end() const {
+        if (m_rear == nullptr) {
+            return ConstIterator(this, nullptr);
+        }
         return ConstIterator(this, m_rear->getNext());
     }
 };
 
-template<typename T>
-Queue<T> filter(Queue<T> currentQueue, bool(&conditionFunction)(T)) {
+template<typename T, class ConditionFunction>
+Queue<T> filter(const Queue<T> &currentQueue, ConditionFunction conditionFunction) {
     Queue<T> filteredQueue;
-    for (const T &element: currentQueue) {
+    for (const T element: currentQueue) {
         if (conditionFunction(element)) {
             filteredQueue.pushBack(element);
         }
     }
     return filteredQueue;
-};
+}
 
-//TODO make sure its the same tyoe and shit
-template<typename T>
-void transform(Queue<T> currentQueue, void (&transformFunction)(T &)) {
-
-    for (T element: currentQueue) {
+template<typename T, class TransformFunction>
+void transform(Queue<T> &currentQueue, TransformFunction transformFunction) {
+    for (T &element: currentQueue) {
         transformFunction(element);
     }
-};
+}
 
 
 

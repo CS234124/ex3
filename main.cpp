@@ -1,4 +1,5 @@
 #include <iostream>
+#include <assert.h>
 #include "HealthPoints.h"
 #include "Queue.h"
 
@@ -39,32 +40,63 @@
 //    return 0;
 //}
 
-class Value{
+class Value {
 
 public:
-    int m_innerValue=0;
+    int m_innerValue = 0;
 
-    Value& operator=(const Value& var) = default;
+    Value &operator=(const Value &var) = default;
 
-    bool operator==(const Value& var) const{
-        return this->m_innerValue==var.m_innerValue;
+    bool operator==(const Value &var) const {
+        return this->m_innerValue == var.m_innerValue;
     }
 
-    Value& operator=(const int& var) {
-        this->m_innerValue=var;
+    Value &operator=(const int &var) {
+        this->m_innerValue = var;
         return *this;
     }
 
 
 };
 
-int main2(int argc, char *argv[]){
+int main2(int argc, char *argv[]) {
 
-    Queue<Value> q;
+    Queue<int> q;
 
-    int size=-1;
-    size= q.size();
-    std::cout << "current Value of queue is"<<size;
+    assert(q.size() == 0);
+    try {
+        q.front();
+    }
+    catch (Queue<int>::EmptyQueue e) {
+        std::cout << "1";
+    }
+    try {
+        q.popFront();
+    }
+    catch (Queue<int>::EmptyQueue e) {
+        std::cout << "2";
+    }
+
+    q.pushBack(0);
+    assert(q.size() == 1);
+    assert(q.front() == 0);
+    q.front() = 1;
+    assert(q.front() == 1);
+
+    q.popFront();
+    assert(q.size() == 0);
+    try {
+        q.front();
+    }
+    catch (Queue<int>::EmptyQueue e) {
+        std::cout << "3";
+    }
+    try {
+        q.popFront();
+    }
+    catch (Queue<int>::EmptyQueue e) {
+        std::cout << "4";
+    }
 
     return 0;
 }
