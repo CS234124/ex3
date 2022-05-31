@@ -4,14 +4,16 @@
 
 template<typename T>
 class Queue {
+private:
     class Node {
-    private:
-        T m_value;
-        Queue<T>::Node *m_next;
 
     public:
-        Node(T value) {
-            m_value = value;
+        ///Value of the Node
+        T m_value;
+        ///Next Node's pointer
+        Queue<T>::Node *m_next;
+
+        explicit Node() {
             m_next = nullptr;
         }
 
@@ -25,32 +27,43 @@ class Queue {
             return m_value == other.m_value && m_next == other.m_next;
         }
 
+        ///Gets pointer to the next node.
+        /// \return pointer to the next node.
         Node *getNext() const {
             return m_next;
         }
 
+        /// Sets next node.
+        /// \param nextNode Pointer to the next node.
         void setNext(Queue<T>::Node *nextNode) {
             m_next = nextNode;
         }
 
+        ///Gets value of the Node.
         T &getValue() {
             return m_value;
         }
 
+        ///Gets const value of the Node.
         const T &getValue() const {
             return m_value;
         }
     };
-private:
+
+    ///pointers to first and last nodes of the queue
     Queue<T>::Node *m_rear, *m_front;
+    ///size of the queue
     int m_size;
 
+    ///Pops all elements of the Queue until empty.
     void emptyQueue() {
         while (!isEmpty()) {
             popFront();
         }
     }
 
+    ///Checks if the queue is empty.
+    /// \return True if empty, False otherwise.
     bool isEmpty() const {
         return (m_front == nullptr) && (m_rear == nullptr);
     }
@@ -63,12 +76,20 @@ public:
         m_size = 0;
     }
 
+    /// Copy c'tor of Queue.
+    /// \param other Queue to copy.
     Queue(const Queue<T> &other) {
         m_front = nullptr;
         m_rear = nullptr;
         m_size = 0;
         for (T element: other) {
-            pushBack(element);
+            try {
+                pushBack(element);
+            }
+            catch (std::bad_alloc &e) {
+                emptyQueue();
+                throw e;
+            }
         }
     }
 
@@ -76,7 +97,13 @@ public:
         if (this != &other) {
             emptyQueue();
             for (T element: other) {
-                pushBack(element);
+                try {
+                    pushBack(element);
+                }
+                catch (std::bad_alloc &e) {
+                    emptyQueue();
+                    throw e;
+                }
             }
         }
         return *this;
@@ -86,19 +113,29 @@ public:
         emptyQueue();
     }
 
+    /// Pushes a new Element to the back of the Queue.
+    /// \param value Value ot the Element to be pushed.
     void pushBack(const T value) {
-        Queue<T>::Node *temp = new Queue<T>::Node(value);
+        Queue<T>::Node *newNode = new Queue<T>::Node();
 
-        if (isEmpty()) {
-            m_front = temp;
-            m_rear = temp;
-        } else {
-            m_rear->setNext(temp);
-            m_rear = temp;
+        try {
+            newNode->m_value=value;
+            if (isEmpty()) {
+                m_front = newNode;
+                m_rear = newNode;
+            } else {
+                m_rear->setNext(newNode);
+                m_rear = newNode;
+            }
+            m_size++;
         }
-        m_size++;
+        catch (const std::bad_alloc&) {
+            delete newNode;
+            throw;
+        }
     }
 
+    ///Pops out the front Element of the Queue. Does not return its value.
     void popFront() {
         if (isEmpty()) {
             throw EmptyQueue();
@@ -115,6 +152,8 @@ public:
         m_size--;
     }
 
+    /// Gets the first Element of the Queue
+    /// \return
     T &front() const {
         if (isEmpty()) {
             throw EmptyQueue();
@@ -122,19 +161,24 @@ public:
         return m_front->getValue();
     }
 
+    /// Gets the size of the Queue.
+    /// \return size of the Queue.
     int size() const {
         return m_size;
     }
 
-    //exception
+    ///Empty Queue exception class
     class EmptyQueue {
     };
 
+    ///Iterator class of the Queue
     class Iterator {
         friend class Queue<T>;
 
     private:
+        /// Queue of the iterator
         Queue<T> *m_queue;
+        ///Current Element the Iterator is pointing to
         Queue<T>::Node *m_currentNode;
 
         Iterator(Queue<T> *queue, Queue<T>::Node *currentNode) : m_queue(queue), m_currentNode(currentNode) {}
@@ -179,14 +223,18 @@ public:
         };
     };
 
+    ///Const Iterator class of the Queue. Used to handle Queues of Const Elements
     class ConstIterator {
         friend class Queue<T>;
 
     private:
+        /// Queue of the iterator
         Queue<T> const *m_queue;
+        ///Current Element the Iterator is pointing to
         Queue<T>::Node const *m_currentNode;
 
-        ConstIterator(const Queue<T> *queue, Queue<T>::Node *currentNode) : m_queue(queue), m_currentNode(currentNode) {}
+        ConstIterator(const Queue<T> *queue, Queue<T>::Node *currentNode) : m_queue(queue),
+                                                                            m_currentNode(currentNode) {}
 
         bool operator==(const ConstIterator &it) const {
             return m_queue == it.m_queue && m_currentNode == it.m_currentNode;
@@ -235,10 +283,12 @@ public:
         };
     };
 
+    /// Gets an Iterator pointing to the beginning of the Queue
     Iterator begin() {
         return Iterator(this, m_front);
     }
 
+    /// Gets an Iterator pointing to the end of the Queue (pointing to after the last element of the Queue)
     Iterator end() {
         if (m_rear == nullptr) {
             return Iterator(this, nullptr);
@@ -246,10 +296,12 @@ public:
         return Iterator(this, m_rear->getNext());
     }
 
+    /// Gets a Const Iterator pointing to the beginning of the Queue
     ConstIterator begin() const {
         return ConstIterator(this, m_front);
     }
 
+    /// Gets a Const Iterator pointing to the end of the Queue (pointing to after the last element of the Queue)
     ConstIterator end() const {
         if (m_rear == nullptr) {
             return ConstIterator(this, nullptr);
@@ -258,6 +310,11 @@ public:
     }
 };
 
+/// Filters all the Queue's Elements according to a given condition function.
+/// \tparam T Type of the Queue's Elements
+/// \param currentQueue Queue to filter
+/// \param conditionFunction Boolean Function that gets an Element and returns if it passed the condition.
+/// \return New Queue filled only with the Elements that passed the condition function
 template<typename T, class ConditionFunction>
 Queue<T> filter(const Queue<T> &currentQueue, ConditionFunction conditionFunction) {
     Queue<T> filteredQueue;
@@ -269,6 +326,9 @@ Queue<T> filter(const Queue<T> &currentQueue, ConditionFunction conditionFunctio
     return filteredQueue;
 }
 
+/// Changes the Queue's Elements according to a transform function.
+/// \param currentQueue Queue to transform
+/// \param transformFunction Void Function that changes a given Element's value.
 template<typename T, class TransformFunction>
 void transform(Queue<T> &currentQueue, TransformFunction transformFunction) {
     for (T &element: currentQueue) {
